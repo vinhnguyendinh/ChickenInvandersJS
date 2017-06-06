@@ -12,6 +12,8 @@ window.onload = function(){
   );
 }
 
+var background;
+
 // preparations before game starts
 var preload = function(){
   Nakama.game.scale.minWidth = 320;
@@ -23,19 +25,26 @@ var preload = function(){
 
   Nakama.game.time.advancedTiming = true;
 
-  Nakama.game.load.atlasJSONHash('assets', 'Assets/assets.png', 'Assets/assets.json');
-  Nakama.game.load.image('background', 'Assets/Map1.png');
+  // Load image
+
+  // Nakama.game.load.atlasJSONHash('assets', 'Assets/assets.png', 'Assets/assets.json');
+  // Nakama.game.load.image('background', 'Assets/Map1.png');
+
+  Nakama.game.load.image('background', 'Assets/Resources/Image/image 9.png');
+
 }
 
 // initialize the game
 var create = function(){
   Nakama.game.physics.startSystem(Phaser.Physics.ARCADE);
   Nakama.keyboard = Nakama.game.input.keyboard;
+
+  background = Nakama.game.add.tileSprite(0, 0, 640, 960, 'background');
 }
 
 // update game state each frame
 var update = function(){
-
+    background.tilePosition.y += 2;
 }
 
 // before camera render (mostly for debug)
