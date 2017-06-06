@@ -25,11 +25,8 @@ var preload = function(){
 
   // Load image
 
-  // Nakama.game.load.atlasJSONHash('assets', 'Assets/assets.png', 'Assets/assets.json');
-  // Nakama.game.load.image('background', 'Assets/Map1.png');
-
-  Nakama.game.load.image('background', 'Assets/Resources/Image/image 9.png');
-
+  Nakama.game.load.atlasJSONHash('assets', 'Assets/assets.png', 'Assets/assets.json');
+  Nakama.game.load.image('background', 'Assets/Map1.png');
 }
 
 // initialize the game
