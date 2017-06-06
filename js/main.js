@@ -12,8 +12,6 @@ window.onload = function(){
   );
 }
 
-var background;
-
 // preparations before game starts
 var preload = function(){
   Nakama.game.scale.minWidth = 320;
@@ -39,12 +37,12 @@ var create = function(){
   Nakama.game.physics.startSystem(Phaser.Physics.ARCADE);
   Nakama.keyboard = Nakama.game.input.keyboard;
 
-  background = Nakama.game.add.tileSprite(0, 0, 640, 960, 'background');
+  Nakama.background = Nakama.game.add.tileSprite(0, 0, 640, 960, 'background');
 }
 
 // update game state each frame
 var update = function(){
-    background.tilePosition.y += 2;
+    Nakama.background.tilePosition.y += 2;
 }
 
 // before camera render (mostly for debug)
