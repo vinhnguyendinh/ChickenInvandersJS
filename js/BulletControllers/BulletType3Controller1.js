@@ -1,9 +1,8 @@
 class BulletType3Controller extends BulletController {
-    constructor(x, y, configs) {
+    constructor(x, y,spriteName, configs) {
         Object.assign(configs, {
-            speed: 1500
+            speed: 300
         });
-        var spriteName = "BulletType3.png";
         super(x, y, spriteName, configs);
         this.sprite.anchor = new Phaser.Point(configs.positionX, 1);
     }

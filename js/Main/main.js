@@ -62,6 +62,7 @@ var create = function(){
   Nakama.keyboard = Nakama.game.input.keyboard;
 
   Nakama.background = Nakama.game.add.tileSprite(0, 0, 640, 960, 'background');
+  Nakama.enemybulletGroup = Nakama.game.add.physicsGroup();
   Nakama.enemyGroup = Nakama.game.add.physicsGroup();
   Nakama.bulletGroup = Nakama.game.add.physicsGroup();
   Nakama.playerGroup = Nakama.game.add.physicsGroup();
@@ -97,7 +98,11 @@ var update = function(){
       Nakama.bulletGroup,
       Nakama.enemyGroup,
       onBulletHitEnemy
-  );
+    );
+
+    for (enemy of Nakama.chickens) {
+        enemy.update();
+    }
 }
 
 // before camera render (mostly for debug)
@@ -110,10 +115,18 @@ var onBulletHitEnemy = function(bullet, enemy) {
     bullet.kill();
     enemy.damage(1);
 }
-
+var onEnemyBulletHitEnemy = function(enemybullet, enemy) {
+    enemybullet.damage(0);
+    enemy.damage(0);
+}
+var onEnemyBulletHitPlayer = function(enemybullet, player) {
+    enemybullet.kill();
+    player.kill();
+}
 var createChicken = function(x, y) {
   return new BaseChickenController(x, y, 'chicken', {
     speed: 14,
+    // cooldown:0.6
 
   });
 }
@@ -121,9 +134,11 @@ var createChicken = function(x, y) {
 function updateGroupChicken() {
   if (this.chickenIsMovingLeft && !touchingLeft()) {
       Nakama.enemyGroup.position.x -= 2;
+      Nakama.enemybulletGroup.position.x -=2;
       this.chickenIsMovingLeft = true;
   } else if (!touchingRight()) {
       Nakama.enemyGroup.position.x += 2;
+      Nakama.enemybulletGroup.position.x +=2;
       this.chickenIsMovingLeft = false;
   } else {
       this.chickenIsMovingLeft = !this.chickenIsMovingLeft;
