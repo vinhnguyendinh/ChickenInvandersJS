@@ -28,7 +28,7 @@ class ShipController {
     } else if (Nakama.keyboard.isDown(this.configs.left)) {
       this.sprite.position.x = Math.max(this.sprite.position.x - this.configs.speed, 0);
     } else if (Nakama.keyboard.isDown(this.configs.right)) {
-      this.sprite.position.x = Math.min(this.sprite.position.x + this.configs.speed, Nakama.game.width);
+      this.sprite.position.x = Math.min(this.sprite.position.x + this.configs.speed, Nakama.game.width - this.sprite.width);
     }
     this.spriteRocket.position = this.sprite.position;
 

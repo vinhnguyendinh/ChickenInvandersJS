@@ -14,7 +14,7 @@ class BaseChickenController {
     this.configs.cooldown = 0.9;
 
   }
-  
+
   update() {
     if (this.sprite.alive) {
       this.timeSinceLastFire += Nakama.game.time.physicsElapsed;
@@ -26,8 +26,6 @@ class BaseChickenController {
   }
 
   enemyfire() {
-
-    // game.physics.arcade.moveToObject(enemybullet,player,120);
     this.createBullet(new Phaser.Point(0, 1));
   }
   createBullet(direction) {
