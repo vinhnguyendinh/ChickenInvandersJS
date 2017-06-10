@@ -106,16 +106,19 @@ var createEnemyForLevelOne = function() {
   }
 }
 
-var createEnemyForLevelTwo = function() {
-  for (var i = 0; i < 3; i++) {
-    for (var j = 0; j < 5; j++) {
-      var x = j * 80;
-      var y = i * 80;
-      Nakama.enemies.push(new StoneController(x, y, 'da.png', {
-        speed: 300
-      }));
-    }
+function createEnemyForLevelTwo(number) {
+  for (var i = number; i > 0; i--) {
+    setTimeout(callback, (number - i) * 500);
   }
+}
+
+function callback() {
+  var x = Nakama.game.rnd.integerInRange(-10, 640);
+  var y = Nakama.game.rnd.integerInRange(-10, 10);
+
+  Nakama.enemies.push(new StoneController(x, y, 'da.png', {
+    speed: 300
+  }));
 }
 
 // update game state each frame
@@ -123,7 +126,8 @@ var update = function() {
 
   if (Nakama.isPlaying) { // Show enemy and player
 
-    var checkNumber = Math.random()*Nakama.enemies.length|0;
+    // var checkNumber = Math.random()*Nakama.enemies.length|0;
+    var checkNumber = Nakama.game.rnd.integerInRange(0, Nakama.enemies.length - 1);
     Nakama.enemies[checkNumber].update();
 
     showPlayerEnemyAndText(Nakama.isPlaying);
@@ -205,7 +209,6 @@ function down(item) {
     Nakama.firstStart = false;
     Nakama.isPlaying = !Nakama.isPlaying;
   } else {
-    // if (countEnemyAlive() == 0) {
     if (Nakama.enemyGroup.countLiving() == 0) {
       Nakama.level++;
       Nakama.enemies = [];
@@ -214,7 +217,7 @@ function down(item) {
           createEnemyForLevelOne();
           break;
         case 2:
-          createEnemyForLevelTwo();
+          createEnemyForLevelTwo(60);
           break;
         case 3:
 
