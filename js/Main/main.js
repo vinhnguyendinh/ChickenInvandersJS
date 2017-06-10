@@ -154,12 +154,13 @@ var reloadGame = function() {
 }
 
 function down(item) {
-  Nakama.isPlaying = !Nakama.isPlaying;
   if (Nakama.firstStart) {
     Nakama.firstStart = false;
+    Nakama.isPlaying = !Nakama.isPlaying;
   } else {
     if (countEnemyAlive() == 0) {
       reloadGame();
+      Nakama.isPlaying = !Nakama.isPlaying;
     } else {
 
     }

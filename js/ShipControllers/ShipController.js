@@ -17,17 +17,15 @@ class ShipController {
   update() {
     if (Nakama.keyboard.isDown(this.configs.up)) {
       this.sprite.position.y = Math.max(this.sprite.position.y - this.configs.speed, 0);
-      this.spriteRocket.position.y = Math.max(this.spriteRocket.position.y - this.configs.speed, 0);
     } else if (Nakama.keyboard.isDown(this.configs.down)) {
       this.sprite.position.y = Math.min(this.sprite.position.y + this.configs.speed, Nakama.game.height - this.sprite.height);
-      this.spriteRocket.position.y = Math.min(this.spriteRocket.position.y + this.configs.speed, Nakama.game.height - this.spriteRocket.height);
     } else if (Nakama.keyboard.isDown(this.configs.left)) {
       this.sprite.position.x = Math.max(this.sprite.position.x - this.configs.speed, 0);
-      this.spriteRocket.position.x = Math.max(this.spriteRocket.position.x - this.configs.speed, 0);
     } else if (Nakama.keyboard.isDown(this.configs.right)) {
-      this.sprite.position.x = Math.min(this.sprite.position.x + this.configs.speed, Nakama.game.width - this.sprite.height);
-      this.spriteRocket.position.x = Math.min(this.spriteRocket.position.x + this.configs.speed, Nakama.game.width - this.spriteRocket.height);
+      this.sprite.position.x = Math.min(this.sprite.position.x + this.configs.speed, Nakama.game.width - this.sprite.width);
     }
+    this.spriteRocket.position = this.sprite.position;
+
     this.timeSinceLastFire += Nakama.game.time.physicsElapsed;
     // Throtting
     if (Nakama.keyboard.isDown(this.configs.fire) && this.timeSinceLastFire > this.configs.cooldown) {
@@ -38,10 +36,6 @@ class ShipController {
 
   fire() {
     this.createBullet(new Phaser.Point(0, -1));
-    // this.createBullet(new Phaser.Point(1, -5));
-    // this.createBullet(new Phaser.Point(-1, -5));
-    // this.createBullet(new Phaser.Point(1, -2));
-    // this.createBullet(new Phaser.Point(-1, -2));
   }
 
   createBullet(direction) {
