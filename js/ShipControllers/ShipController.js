@@ -44,8 +44,9 @@ class ShipController {
   }
 
   createBullet(direction) {
-    new BulletType1Controller(this.sprite.position.x, this.sprite.position.y, {
-        direction: direction
+    new BulletController(this.sprite.position.x, this.sprite.position.y, 'd.png',{
+        direction: direction,
+        speed    : 1500
     });
   }
 }

@@ -10,7 +10,8 @@ Nakama.configs = {
     right     : Phaser.Keyboard.RIGHT,
     fire      : Phaser.Keyboard.ENTER,
     spriteSuffix: "Player",
-    speed     : 500
+    speed     : 500,
+    cooldown  : 0.3
   },
   PLAYER_2_CONTROL  : {
     up        : Phaser.Keyboard.W,
@@ -19,7 +20,8 @@ Nakama.configs = {
     right     : Phaser.Keyboard.D,
     fire      : Phaser.Keyboard.SPACEBAR,
     spriteSuffix: "Partner",
-    speed     : 500
+    speed     : 500,
+    cooldown  : 0.5
   }
 };
 
@@ -87,12 +89,24 @@ var update = function(){
     for (player of Nakama.players) {
         player.update();
     }
+
+    Nakama.game.physics.arcade.overlap(
+      Nakama.bulletGroup,
+      Nakama.chickenGroup,
+      onBulletHitEnemy
+  );
 }
 
 // before camera render (mostly for debug)
 var render = function(){}
 
 // MARK : - Chicken
+
+// Kill chicken
+var onBulletHitEnemy = function(bullet, enemy) {
+    bullet.kill();
+    enemy.damage(1);
+}
 
 var createChicken = function(x, y) {
   return new BaseChickenController(x, y, 'chicken', {

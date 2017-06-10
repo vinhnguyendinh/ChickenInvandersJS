@@ -4,5 +4,7 @@ class BaseChickenController {
     this.configs = configs;
     this.sprite.animations.add('run');
     this.sprite.animations.play('run', this.configs.speed, true);
+    // Health
+    this.sprite.health = 2;
   }
 }
