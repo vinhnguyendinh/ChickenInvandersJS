@@ -80,7 +80,7 @@ var create = function(){
 
   Nakama.players = [];
   Nakama.players.push(
-    new ShipController(200, 600, '5.png', Nakama.configs.PLAYER_1_CONTROL)
+    new ShipController(200, 600, '5.png', Nakama.configs.PLAYER_2_CONTROL)
   );
 
   // Init property
@@ -89,10 +89,13 @@ var create = function(){
   Nakama.isPlaying = false;
   Nakama.firstStart = true;
 
-  Nakama.introText = Nakama.game.add.text(Nakama.game.world.centerX, 400, '- click to start -', { font: "40px Arial", fill: "#ffffff", align: "center" });
+  Nakama.introText = Nakama.game.add.text(Nakama.game.world.centerX, 400, '- ENTER to start -', { font: "40px Arial", fill: "#ffffff", align: "center" });
   Nakama.introText.anchor.setTo(0.5, 0.5);
   Nakama.introText.inputEnabled = true;
-  Nakama.introText.events.onInputDown.add(down, this);
+  var key1 = Nakama.game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
+  key1.onDown.add(down, this);
+  // Nakama.introText.events.onInputDown.add(down, this);
+
   Nakama.scoreText = Nakama.game.add.text(32, 900, `score: ${Nakama.score}`, { font: "20px Arial", fill: "#ffffff", align: "left" });
   Nakama.livesText = Nakama.game.add.text(550, 900, `lives: ${Nakama.lives}`, { font: "20px Arial", fill: "#ffffff", align: "left" });
 
@@ -125,10 +128,10 @@ var update = function(){
 
   } else { // Hide enemy and player
     if (Nakama.firstStart) {
-      changeIntroText('- click to start -');
+      changeIntroText('- ENTER to start -');
     } else {
       if (countEnemyAlive() == 0) {
-        changeIntroText('Victory!');
+        changeIntroText('Victory! ENTER to REPLAY');
       } else {
         changeIntroText('Game Over!');
       }
@@ -144,10 +147,22 @@ var changeIntroText = function(text) {
   Nakama.introText.text = text;
 }
 
+var reloadGame = function() {
+  for (enemy of Nakama.enemies) {
+    enemy.sprite.reset(enemy.position.x, enemy.position.y);
+  }
+}
+
 function down(item) {
-  Nakama.isPlaying = true;
+  Nakama.isPlaying = !Nakama.isPlaying;
   if (Nakama.firstStart) {
     Nakama.firstStart = false;
+  } else {
+    if (countEnemyAlive() == 0) {
+      reloadGame();
+    } else {
+
+    }
   }
 }
 
