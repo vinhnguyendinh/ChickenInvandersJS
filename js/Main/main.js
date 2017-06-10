@@ -91,7 +91,7 @@ var create = function(){
   var key1 = Nakama.game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
   key1.onDown.add(down, this);
 
-  Nakama.scoreText = Nakama.game.add.text(Nakama.game.world.centerX, 20, `Level: ${Nakama.level}`, { font: "20px Arial", fill: "#ffffff", align: "center" });
+  Nakama.levelText = Nakama.game.add.text(Nakama.game.world.centerX, 20, `Level: ${Nakama.level}`, { font: "20px Arial", fill: "#ffffff", align: "center" });
   Nakama.scoreText = Nakama.game.add.text(32, 900, `score: ${Nakama.score}`, { font: "20px Arial", fill: "#ffffff", align: "left" });
   Nakama.livesText = Nakama.game.add.text(550, 900, `lives: ${Nakama.lives}`, { font: "20px Arial", fill: "#ffffff", align: "left" });
 }
@@ -106,30 +106,50 @@ var createEnemyForLevelOne = function() {
   }
 }
 
-function createEnemyForLevelTwo(number) {
-  for (var i = number; i > 0; i--) {
-    setTimeout(callback, (number - i) * 500);
+var createEnemyForLevelThree = function() {
+  Nakama.enemies = [];
+  for (var i = 0; i < 3; i++) {
+    for (var j = 0; j < 5; j++) {
+      var x = j * 80;
+      var y = i * 80;
+      Nakama.enemies.push(
+        new ChickenType1Controller(x, y+ 200, 'chicken', {
+          speed: 14
+        })
+      );
+    }
   }
 }
 
-function callback() {
+function createEnemyForLevelTwo(number) {
+  for (var i = number; i > 0; i--) {
+    setTimeout(callback, (number - i) * 500, i);
+  }
+}
+
+function callback(time) {
   var x = Nakama.game.rnd.integerInRange(-10, 640);
   var y = Nakama.game.rnd.integerInRange(-10, 10);
 
   Nakama.enemies.push(new StoneController(x, y, 'da.png', {
     speed: 300
   }));
+
+  if (time <= 1) {
+    Nakama.level++;
+    setTimeout(callbackInitChicken, 5000);
+  }
+
+}
+
+var callbackInitChicken = function() {
+  createEnemyForLevelThree();
 }
 
 // update game state each frame
 var update = function() {
 
   if (Nakama.isPlaying) { // Show enemy and player
-
-    // var checkNumber = Math.random()*Nakama.enemies.length|0;
-    var checkNumber = Nakama.game.rnd.integerInRange(0, Nakama.enemies.length - 1);
-    Nakama.enemies[checkNumber].update();
-
     showPlayerEnemyAndText(Nakama.isPlaying);
     collision();
     Nakama.scoreText.text = `score: ${Nakama.score}`;
@@ -139,15 +159,22 @@ var update = function() {
         player.update();
     }
 
+    updateTextLevel();
+
     switch (Nakama.level) {
       case 1:
         updateGroupChicken();
         break;
       case 2:
+        break;
+      case 3:
+        var checkNumber = Nakama.game.rnd.integerInRange(0, Nakama.enemies.length - 1);
+        Nakama.enemies[checkNumber].update();
 
+        updateGroupChicken();
         break;
       default:
-
+        break;
     }
 
   } else { // Hide enemy and player
@@ -163,6 +190,10 @@ var update = function() {
     showPlayerEnemyAndText(Nakama.isPlaying);
   }
 
+}
+
+var updateTextLevel = function() {
+  Nakama.levelText.text = `Level: ${Nakama.level}`;
 }
 
 var collision = function() {
@@ -217,10 +248,10 @@ function down(item) {
           createEnemyForLevelOne();
           break;
         case 2:
-          createEnemyForLevelTwo(60);
+          createEnemyForLevelTwo(10);
           break;
         case 3:
-
+          createEnemyForLevelThree();
           break;
         default:
 
