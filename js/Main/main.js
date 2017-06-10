@@ -80,6 +80,9 @@ var create = function(){
   Nakama.players.push(
     new ShipController(200, 600, '5.png', Nakama.configs.PLAYER_1_CONTROL)
   );
+
+  // Level
+  Nakama.levelGame = 0;
 }
 
 // update game state each frame
