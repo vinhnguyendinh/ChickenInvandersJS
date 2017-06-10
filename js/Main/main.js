@@ -68,7 +68,6 @@ var create = function(){
   Nakama.bulletGroup = Nakama.game.add.physicsGroup();
   Nakama.playerGroup = Nakama.game.add.physicsGroup();
   Nakama.buttonGroup = Nakama.game.add.physicsGroup();
-
   Nakama.enemies = [];
   for (var i = 0; i < 3; i++) {
     for (var j = 0; j < 5; j++) {
@@ -107,6 +106,8 @@ var create = function(){
 // update game state each frame
 var update = function(){
   if (Nakama.isPlaying) { // Show enemy and player
+    var checkNumber = Math.random()*Nakama.enemies.length|0;
+    Nakama.enemies[checkNumber].update();
     showPlayerEnemyAndText(Nakama.isPlaying);
     Nakama.scoreText.text = `score: ${Nakama.score}`;
 
@@ -115,10 +116,6 @@ var update = function(){
     for (player of Nakama.players) {
         player.update();
     }
-    for (enemy of Nakama.enemies) {
-          enemy.update();
-    }
-
     Nakama.game.physics.arcade.overlap(
       Nakama.bulletGroup,
       Nakama.enemyGroup,
@@ -129,6 +126,11 @@ var update = function(){
       Nakama.playerGroup,
       Nakama.enemyGroup,
       playerEnemyCollider
+    );
+    Nakama.game.physics.arcade.overlap(
+      Nakama.playerGroup,
+      Nakama.enemybulletGroup,
+      playerEnemybulletCollider
     );
 
   } else { // Hide enemy and player
@@ -187,6 +189,10 @@ var playerEnemyCollider = function(player, enemy) {
     Nakama.isPlaying = false;
   }
 }
+var playerEnemybulletCollider = function(player, enemybullet) {
+  enemybullet.kill();
+  player.kill();
+}
 
 // MARK : - Chicken
 
@@ -205,6 +211,7 @@ var onBulletHitEnemy = function(bullet, enemy) {
   }
 
 }
+
 
 var countEnemyAlive = function() {
   var count = 0;

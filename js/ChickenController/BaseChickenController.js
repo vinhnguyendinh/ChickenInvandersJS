@@ -11,19 +11,21 @@ class BaseChickenController {
     this.sprite.anchor = new Phaser.Point(0.5, 0.5);
     this.sprite.health = 2;
     this.timeSinceLastFire = 0;
-    this.configs.cooldown = 0.7;
+    this.configs.cooldown = 0.9;
 
   }
   update() {
     if (this.sprite.alive) {
       this.timeSinceLastFire += Nakama.game.time.physicsElapsed;
       if (this.timeSinceLastFire > this.configs.cooldown) {
-        this.fire();
+        this.enemyfire();
         this.timeSinceLastFire = 0;
       }
     }
   }
-  fire() {
+  enemyfire() {
+
+    // game.physics.arcade.moveToObject(enemybullet,player,120);
     this.createBullet(new Phaser.Point(0, 1));
   }
   createBullet(direction) {
