@@ -92,12 +92,17 @@ var update = function(){
     for (player of Nakama.players) {
         player.update();
     }
+    Nakama.game.physics.arcade.overlap(
+      Nakama.playerGroup,
+      Nakama.enemyGroup,
+      gameOver
+    );
 
     Nakama.game.physics.arcade.overlap(
       Nakama.bulletGroup,
       Nakama.enemyGroup,
-      onBulletHitEnemy
-  );
+      onBulletHitEnemy,
+);
 }
 
 // before camera render (mostly for debug)
@@ -110,6 +115,19 @@ var onBulletHitEnemy = function(bullet, enemy) {
     bullet.kill();
     enemy.damage(1);
 }
+//game over
+
+var gameOver = function(player, enemy) {
+    player.kill();
+    enemy.kill();
+    onGameOver();
+}
+
+
+function onGameOver() {
+    alert("Game over");
+}
+
 
 var createChicken = function(x, y) {
   return new BaseChickenController(x, y, 'chicken', {
