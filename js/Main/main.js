@@ -84,9 +84,10 @@ var create = function(){
   );
 
   // Init property
-  Nakama.lives = 3;
+  Nakama.lives = 1;
   Nakama.score = 0;
   Nakama.isPlaying = false;
+  Nakama.firstStart = true;
 
   Nakama.introText = Nakama.game.add.text(Nakama.game.world.centerX, 400, '- click to start -', { font: "40px Arial", fill: "#ffffff", align: "center" });
   Nakama.introText.anchor.setTo(0.5, 0.5);
@@ -101,7 +102,7 @@ var create = function(){
 
 // update game state each frame
 var update = function(){
-  if (Nakama.isPlaying) {
+  if (Nakama.isPlaying) { // Show enemy and player
     showPlayerEnemyAndText(Nakama.isPlaying);
 
     Nakama.background.tilePosition.y += 2;
@@ -115,25 +116,36 @@ var update = function(){
       Nakama.enemyGroup,
       onBulletHitEnemy
     );
-  } else {
-    showPlayerEnemyAndText(Nakama.isPlaying);
-    if (Nakama.keyboard.isDown()) {
 
+    Nakama.game.physics.arcade.overlap(
+      Nakama.playerGroup,
+      Nakama.enemyGroup,
+      playerEnemyCollider
+    );
+
+  } else { // Hide enemy and player
+    if (Nakama.firstStart) {
+      changeIntroText('- click to start -');
+    } else {
+      changeIntroText('Game Over');
     }
-
+    showPlayerEnemyAndText(Nakama.isPlaying);
   }
 }
 
 // before camera render (mostly for debug)
 var render = function(){}
 
-// MARK: - Event Click
+var changeIntroText = function(text) {
+  Nakama.introText.text = text;
+}
 
 function down(item) {
   Nakama.isPlaying = true;
+  if (Nakama.firstStart) {
+    Nakama.firstStart = false;
+  }
 }
-
-// MARK: - Show/Hide Player, Enemy and Text
 
 var showPlayerEnemyAndText = function(isShow) {
   Nakama.playerGroup.visible = isShow;
@@ -141,12 +153,22 @@ var showPlayerEnemyAndText = function(isShow) {
   Nakama.introText.visible = !isShow;
 }
 
+var playerEnemyCollider = function(player, enemy) {
+  Nakama.lives--;
+  if (Nakama.lives > 0) {
+
+  } else {
+    Nakama.isPlaying = false;
+
+  }
+}
+
 // MARK : - Chicken
 
 // Kill chicken
 var onBulletHitEnemy = function(bullet, enemy) {
-    bullet.kill();
-    enemy.damage(1);
+  bullet.kill();
+  enemy.damage(1);
 }
 
 var createChicken = function(x, y) {
