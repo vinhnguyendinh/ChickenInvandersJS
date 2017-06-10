@@ -8,7 +8,7 @@ Nakama.configs = {
     down      : Phaser.Keyboard.DOWN,
     left      : Phaser.Keyboard.LEFT,
     right     : Phaser.Keyboard.RIGHT,
-    fire      : Phaser.Keyboard.ENTER,
+    fire      : Phaser.Keyboard.SPACEBAR,
     spriteSuffix: "Player",
     speed     : 5,
     cooldown  : 0.3
@@ -18,7 +18,7 @@ Nakama.configs = {
     down      : Phaser.Keyboard.S,
     left      : Phaser.Keyboard.A,
     right     : Phaser.Keyboard.D,
-    fire      : Phaser.Keyboard.SPACEBAR,
+    fire      : Phaser.Keyboard.ENTER,
     spriteSuffix: "Partner",
     speed     : 5,
     cooldown  : 0.5
@@ -63,6 +63,7 @@ var create = function(){
   Nakama.keyboard = Nakama.game.input.keyboard;
 
   Nakama.background = Nakama.game.add.tileSprite(0, 0, 640, 960, 'background');
+  Nakama.enemybulletGroup = Nakama.game.add.physicsGroup();
   Nakama.enemyGroup = Nakama.game.add.physicsGroup();
   Nakama.bulletGroup = Nakama.game.add.physicsGroup();
   Nakama.playerGroup = Nakama.game.add.physicsGroup();
@@ -80,7 +81,7 @@ var create = function(){
 
   Nakama.players = [];
   Nakama.players.push(
-    new ShipController(200, 600, '5.png', Nakama.configs.PLAYER_2_CONTROL)
+    new ShipController(200, 600, '5.png', Nakama.configs.PLAYER_1_CONTROL)
   );
 
   // Init property
@@ -114,6 +115,9 @@ var update = function(){
     for (player of Nakama.players) {
         player.update();
     }
+    for (enemy of Nakama.enemies) {
+          enemy.update();
+    }
 
     Nakama.game.physics.arcade.overlap(
       Nakama.bulletGroup,
@@ -139,6 +143,7 @@ var update = function(){
     }
     showPlayerEnemyAndText(Nakama.isPlaying);
   }
+
 }
 
 // before camera render (mostly for debug)
@@ -221,9 +226,11 @@ var createChicken = function(x, y) {
 function updateGroupChicken() {
   if (this.chickenIsMovingLeft && !touchingLeft()) {
       Nakama.enemyGroup.position.x -= 2;
+      Nakama.enemybulletGroup.position.x -= 2;
       this.chickenIsMovingLeft = true;
   } else if (!touchingRight()) {
       Nakama.enemyGroup.position.x += 2;
+      Nakama.enemybulletGroup.position.x += 2;
       this.chickenIsMovingLeft = false;
   } else {
       this.chickenIsMovingLeft = !this.chickenIsMovingLeft;
