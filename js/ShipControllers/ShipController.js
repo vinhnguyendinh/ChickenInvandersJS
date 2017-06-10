@@ -41,6 +41,7 @@ class ShipController {
   }
 
   fire() {
+    Nakama.game.add.audio('shoot').play();
     this.createBullet(new Phaser.Point(0, -1));
   }
 

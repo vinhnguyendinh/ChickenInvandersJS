@@ -53,6 +53,11 @@ var preload = function(){
   Nakama.game.load.atlasJSONHash('chicken', 'Assets/chickens.png', 'Assets/chickens.json');
   Nakama.game.load.atlasJSONHash('rocketPlayer', 'Assets/rockets.png', 'Assets/rockets.json');
 
+  // Load audio
+  Nakama.game.load.audio('backgroundMusic', 'assets/backgroundMusic.mp3');
+  Nakama.game.load.audio('shoot', 'assets/Sound/sound 191 (rock_wav).mp3');
+  Nakama.game.load.audio('enemyDie', 'assets/Sound/sound 187 (fire_wav).mp3');
+
 }
 
 var chicken;
@@ -67,6 +72,14 @@ var create = function(){
   Nakama.enemyGroup = Nakama.game.add.physicsGroup();
   Nakama.bulletGroup = Nakama.game.add.physicsGroup();
   Nakama.playerGroup = Nakama.game.add.physicsGroup();
+
+  var backgroundMusic = Nakama.game.add.audio('backgroundMusic');
+  //  Being mp3 files these take time to decode, so we can't play them instantly
+  //  Using setDecodedCallback we can be notified when they're ALL ready for use.
+  //  The audio files could decode in ANY order, we can never be sure which it'll be.
+  backgroundMusic.volume = 0.1;
+  backgroundMusic.play();
+  backgroundMusic.loopFull();
 
   Nakama.enemies = [];
   createEnemyForLevelOne();
@@ -279,6 +292,7 @@ var playerEnemyCollider = function(player, enemy) {
 }
 
 // MARK : - Chicken
+var count = 0;
 
 // Kill chicken
 var onBulletHitEnemy = function(bullet, enemy) {
@@ -286,6 +300,13 @@ var onBulletHitEnemy = function(bullet, enemy) {
   enemy.damage(1);
   if (enemy.alive == false) {
     Nakama.score++;
+    count++;
+    Nakama.game.add.audio('enemyDie').play();
+    console.log(count);
+    if (count >= 15) {
+      Nakama.isPlaying = false;
+      count = 0;
+    }
   }
 
   if (Nakama.enemyGroup.countLiving() == 0) {

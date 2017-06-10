@@ -12,6 +12,7 @@ class ChickenType1Controller extends BaseChickenController {
         this.timeSinceLastFire = 0;
       }
     }
+    
   }
 
   enemyfire() {
