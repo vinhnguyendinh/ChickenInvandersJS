@@ -106,7 +106,7 @@ var create = function(){
 // update game state each frame
 var update = function(){
   if (Nakama.isPlaying) { // Show enemy and player
-    var checkNumber = Math.random()*Nakama.enemies.length|0;
+    var checkNumber = Math.random() * Nakama.enemies.length|0;
     Nakama.enemies[checkNumber].update();
     showPlayerEnemyAndText(Nakama.isPlaying);
     Nakama.scoreText.text = `score: ${Nakama.score}`;
@@ -140,7 +140,7 @@ var update = function(){
       if (countEnemyAlive() == 0) {
         changeIntroText('- ENTER to Next Level -');
       } else {
-        changeIntroText('Game Over! ENTER to REPLAY');
+        endGame();
       }
     }
     showPlayerEnemyAndText(Nakama.isPlaying);
@@ -151,11 +151,50 @@ var update = function(){
 // before camera render (mostly for debug)
 var render = function(){}
 
+var endGame = function() {
+  changeIntroText('Game Over! ENTER to REPLAY');
+}
+
 var changeIntroText = function(text) {
   Nakama.introText.text = text;
 }
 
+var createEnemyForLevelOne = function() {
+  for (var i = 0; i < 3; i++) {
+    for (var j = 0; j < 5; j++) {
+      var x = j * 80;
+      var y = i * 80;
+      Nakama.enemies.push(createChicken(x, y + 200));
+    }
+  }
+}
+
+var createEnemyForLevelTwo = function() {
+  for (var i = 0; i < 3; i++) {
+    for (var j = 0; j < 5; j++) {
+      var x = j * 80;
+      var y = i * 80;
+      Nakama.enemies.push(new StoneController(x, y, 'da.png', {
+        speed: 300
+      }));
+    }
+  }
+}
+
 var reloadGame = function() {
+  Nakama.level = 1;
+  Nakama.lives = 1;
+  Nakama.score = 0;
+  // Nakama.isPlaying = false;
+  Nakama.isNextLevel = false;
+  // Nakama.firstStart = true;
+
+  // Nakama.introText.text = '- ENTER to start -';
+  // Nakama.scoreText.text = `Level: ${Nakama.level}`;
+  // Nakama.livesText.text = `lives: ${Nakama.lives}`;
+
+  Nakama.enemyGroup = Nakama.game.add.physicsGroup();
+  createEnemyForLevelOne();
   for (enemy of Nakama.enemies) {
     enemy.sprite.reset(enemy.position.x, enemy.position.y);
   }
@@ -167,10 +206,26 @@ function down(item) {
     Nakama.isPlaying = !Nakama.isPlaying;
   } else {
     if (countEnemyAlive() == 0) {
-      reloadGame();
-      Nakama.isPlaying = !Nakama.isPlaying;
-    } else {
+      Nakama.level++;
+      Nakama.enemies = [];
+      switch (Nakama.level) {
+        case 1:
+          createEnemyForLevelOne();
+          break;
+        case 2:
+          createEnemyForLevelTwo();
+          break;
+        case 3:
 
+          break;
+        default:
+
+      }
+      Nakama.isPlaying = !Nakama.isPlaying;
+
+    } else {
+      Nakama.isPlaying = true;
+      reloadGame();
     }
   }
 }
