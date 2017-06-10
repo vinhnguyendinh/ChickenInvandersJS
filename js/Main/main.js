@@ -132,9 +132,9 @@ var update = function(){
       changeIntroText('- ENTER to start -');
     } else {
       if (countEnemyAlive() == 0) {
-        changeIntroText('Victory! ENTER to REPLAY');
+        changeIntroText('- ENTER to Next Level -');
       } else {
-        changeIntroText('Game Over!');
+        changeIntroText('Game Over! ENTER to REPLAY');
       }
     }
     showPlayerEnemyAndText(Nakama.isPlaying);
