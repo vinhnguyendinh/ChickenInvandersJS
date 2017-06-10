@@ -68,34 +68,30 @@ var create = function(){
   Nakama.playerGroup = Nakama.game.add.physicsGroup();
   Nakama.buttonGroup = Nakama.game.add.physicsGroup();
 
-  Nakama.enemies = [];
+  Nakama.chickens = [];
   for (var i = 0; i < 3; i++) {
     for (var j = 0; j < 5; j++) {
       var x = j * 80;
       var y = i * 80;
-      Nakama.enemies.push(createChicken(x, y + 200));
+      Nakama.chickens.push(createChicken(x, y + 200));
     }
   }
   this.chickenIsMovingLeft = true;
 
   Nakama.players = [];
   Nakama.players.push(
-    new ShipController(200, 600, '5.png', Nakama.configs.PLAYER_2_CONTROL)
+    new ShipController(200, 600, '5.png', Nakama.configs.PLAYER_1_CONTROL)
   );
 
   // Init property
-  Nakama.lives = 1;
+  Nakama.lives = 3;
   Nakama.score = 0;
   Nakama.isPlaying = false;
-  Nakama.firstStart = true;
 
-  Nakama.introText = Nakama.game.add.text(Nakama.game.world.centerX, 400, '- ENTER to start -', { font: "40px Arial", fill: "#ffffff", align: "center" });
+  Nakama.introText = Nakama.game.add.text(Nakama.game.world.centerX, 400, '- click to start -', { font: "40px Arial", fill: "#ffffff", align: "center" });
   Nakama.introText.anchor.setTo(0.5, 0.5);
   Nakama.introText.inputEnabled = true;
-  var key1 = Nakama.game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
-  key1.onDown.add(down, this);
-  // Nakama.introText.events.onInputDown.add(down, this);
-
+  Nakama.introText.events.onInputDown.add(down, this);
   Nakama.scoreText = Nakama.game.add.text(32, 900, `score: ${Nakama.score}`, { font: "20px Arial", fill: "#ffffff", align: "left" });
   Nakama.livesText = Nakama.game.add.text(550, 900, `lives: ${Nakama.lives}`, { font: "20px Arial", fill: "#ffffff", align: "left" });
 
@@ -105,9 +101,8 @@ var create = function(){
 
 // update game state each frame
 var update = function(){
-  if (Nakama.isPlaying) { // Show enemy and player
+  if (Nakama.isPlaying) {
     showPlayerEnemyAndText(Nakama.isPlaying);
-    Nakama.scoreText.text = `score: ${Nakama.score}`;
 
     Nakama.background.tilePosition.y += 2;
     updateGroupChicken();
@@ -120,53 +115,25 @@ var update = function(){
       Nakama.enemyGroup,
       onBulletHitEnemy
     );
-
-    Nakama.game.physics.arcade.overlap(
-      Nakama.playerGroup,
-      Nakama.enemyGroup,
-      playerEnemyCollider
-    );
-
-  } else { // Hide enemy and player
-    if (Nakama.firstStart) {
-      changeIntroText('- ENTER to start -');
-    } else {
-      if (countEnemyAlive() == 0) {
-        changeIntroText('Victory! ENTER to REPLAY');
-      } else {
-        changeIntroText('Game Over!');
-      }
-    }
+  } else {
     showPlayerEnemyAndText(Nakama.isPlaying);
+    if (Nakama.keyboard.isDown()) {
+
+    }
+
   }
 }
 
 // before camera render (mostly for debug)
 var render = function(){}
 
-var changeIntroText = function(text) {
-  Nakama.introText.text = text;
-}
-
-var reloadGame = function() {
-  for (enemy of Nakama.enemies) {
-    enemy.sprite.reset(enemy.position.x, enemy.position.y);
-  }
-}
+// MARK: - Event Click
 
 function down(item) {
-  if (Nakama.firstStart) {
-    Nakama.firstStart = false;
-    Nakama.isPlaying = !Nakama.isPlaying;
-  } else {
-    if (countEnemyAlive() == 0) {
-      reloadGame();
-      Nakama.isPlaying = !Nakama.isPlaying;
-    } else {
-
-    }
-  }
+  Nakama.isPlaying = true;
 }
+
+// MARK: - Show/Hide Player, Enemy and Text
 
 var showPlayerEnemyAndText = function(isShow) {
   Nakama.playerGroup.visible = isShow;
@@ -174,41 +141,12 @@ var showPlayerEnemyAndText = function(isShow) {
   Nakama.introText.visible = !isShow;
 }
 
-var playerEnemyCollider = function(player, enemy) {
-  Nakama.lives--;
-  if (Nakama.lives > 0) {
-
-  } else {
-    Nakama.isPlaying = false;
-  }
-}
-
 // MARK : - Chicken
 
 // Kill chicken
 var onBulletHitEnemy = function(bullet, enemy) {
-  bullet.kill();
-  enemy.damage(1);
-  if (enemy.alive == false) {
-    Nakama.score++;
-  }
-
-  if (countEnemyAlive() == 0) {
-    Nakama.isPlaying = false;
-  } else {
-
-  }
-
-}
-
-var countEnemyAlive = function() {
-  var count = 0;
-  for (enemy of Nakama.enemies) {
-    if (enemy.sprite.health > 0) {
-      count++;
-    }
-  }
-  return count;
+    bullet.kill();
+    enemy.damage(1);
 }
 
 var createChicken = function(x, y) {

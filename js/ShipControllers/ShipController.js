@@ -7,25 +7,24 @@ class ShipController {
 
     this.configs = configs;
     this.timeSinceLastFire = 0;
+
+    this.spriteRocket = Nakama.playerGroup.create(x, y, 'rocketPlayer');
+    this.spriteRocket.animations.add('run');
+    this.spriteRocket.animations.play('run', this.configs.speed, true);
+    this.spriteRocket.anchor = new Phaser.Point(0.5, -0.5);
   }
 
   update() {
-    // Move our space
     if (Nakama.keyboard.isDown(this.configs.up)) {
-      this.sprite.body.velocity.y = -this.configs.speed;
+      this.sprite.position.y = Math.max(this.sprite.position.y - this.configs.speed, 0);
     } else if (Nakama.keyboard.isDown(this.configs.down)) {
-      this.sprite.body.velocity.y = this.configs.speed;
-    } else {
-      this.sprite.body.velocity.y = 0;
-    }
-
-    if (Nakama.keyboard.isDown(this.configs.left)) {
-      this.sprite.body.velocity.x = -this.configs.speed;
+      this.sprite.position.y = Math.min(this.sprite.position.y + this.configs.speed, Nakama.game.height - this.sprite.height);
+    } else if (Nakama.keyboard.isDown(this.configs.left)) {
+      this.sprite.position.x = Math.max(this.sprite.position.x - this.configs.speed, 0);
     } else if (Nakama.keyboard.isDown(this.configs.right)) {
-      this.sprite.body.velocity.x = this.configs.speed;
-    } else {
-      this.sprite.body.velocity.x = 0;
+      this.sprite.position.x = Math.min(this.sprite.position.x + this.configs.speed, Nakama.game.width - this.sprite.width);
     }
+    this.spriteRocket.position = this.sprite.position;
 
     this.timeSinceLastFire += Nakama.game.time.physicsElapsed;
     // Throtting
@@ -37,10 +36,6 @@ class ShipController {
 
   fire() {
     this.createBullet(new Phaser.Point(0, -1));
-    this.createBullet(new Phaser.Point(1, -5));
-    this.createBullet(new Phaser.Point(-1, -5));
-    this.createBullet(new Phaser.Point(1, -2));
-    this.createBullet(new Phaser.Point(-1, -2));
   }
 
   createBullet(direction) {
