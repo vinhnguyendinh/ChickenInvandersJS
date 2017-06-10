@@ -10,7 +10,7 @@ Nakama.configs = {
     right     : Phaser.Keyboard.RIGHT,
     fire      : Phaser.Keyboard.ENTER,
     spriteSuffix: "Player",
-    speed     : 500,
+    speed     : 5,
     cooldown  : 0.3
   },
   PLAYER_2_CONTROL  : {
@@ -20,7 +20,7 @@ Nakama.configs = {
     right     : Phaser.Keyboard.D,
     fire      : Phaser.Keyboard.SPACEBAR,
     spriteSuffix: "Partner",
-    speed     : 500,
+    speed     : 5,
     cooldown  : 0.5
   }
 };
@@ -51,6 +51,7 @@ var preload = function(){
   Nakama.game.load.atlasJSONHash('assets', 'Assets/assets.png', 'Assets/assets.json');
   Nakama.game.load.image('background', 'Assets/Map1.png');
   Nakama.game.load.atlasJSONHash('chicken', 'Assets/chickens.png', 'Assets/chickens.json');
+  Nakama.game.load.atlasJSONHash('rocketPlayer', 'Assets/rockets.png', 'Assets/rockets.json');
 
 }
 
@@ -65,6 +66,7 @@ var create = function(){
   Nakama.enemyGroup = Nakama.game.add.physicsGroup();
   Nakama.bulletGroup = Nakama.game.add.physicsGroup();
   Nakama.playerGroup = Nakama.game.add.physicsGroup();
+  Nakama.buttonGroup = Nakama.game.add.physicsGroup();
 
   Nakama.chickens = [];
   for (var i = 0; i < 3; i++) {
@@ -81,12 +83,27 @@ var create = function(){
     new ShipController(200, 600, '5.png', Nakama.configs.PLAYER_1_CONTROL)
   );
 
-  // Level
-  Nakama.levelGame = 0;
+  // Init property
+  Nakama.lives = 3;
+  Nakama.score = 0;
+  Nakama.isPlaying = false;
+
+  Nakama.introText = Nakama.game.add.text(Nakama.game.world.centerX, 400, '- click to start -', { font: "40px Arial", fill: "#ffffff", align: "center" });
+  Nakama.introText.anchor.setTo(0.5, 0.5);
+  Nakama.introText.inputEnabled = true;
+  Nakama.introText.events.onInputDown.add(down, this);
+  Nakama.scoreText = Nakama.game.add.text(32, 900, `score: ${Nakama.score}`, { font: "20px Arial", fill: "#ffffff", align: "left" });
+  Nakama.livesText = Nakama.game.add.text(550, 900, `lives: ${Nakama.lives}`, { font: "20px Arial", fill: "#ffffff", align: "left" });
+
+  // Button Start
+
 }
 
 // update game state each frame
 var update = function(){
+  if (Nakama.isPlaying) {
+    showPlayerEnemyAndText(Nakama.isPlaying);
+
     Nakama.background.tilePosition.y += 2;
     updateGroupChicken();
     for (player of Nakama.players) {
@@ -97,11 +114,32 @@ var update = function(){
       Nakama.bulletGroup,
       Nakama.enemyGroup,
       onBulletHitEnemy
-  );
+    );
+  } else {
+    showPlayerEnemyAndText(Nakama.isPlaying);
+    if (Nakama.keyboard.isDown()) {
+
+    }
+
+  }
 }
 
 // before camera render (mostly for debug)
 var render = function(){}
+
+// MARK: - Event Click
+
+function down(item) {
+  Nakama.isPlaying = true;
+}
+
+// MARK: - Show/Hide Player, Enemy and Text
+
+var showPlayerEnemyAndText = function(isShow) {
+  Nakama.playerGroup.visible = isShow;
+  Nakama.enemyGroup.visible = isShow;
+  Nakama.introText.visible = !isShow;
+}
 
 // MARK : - Chicken
 
