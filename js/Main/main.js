@@ -107,6 +107,7 @@ var create = function(){
 var update = function(){
   if (Nakama.isPlaying) { // Show enemy and player
     showPlayerEnemyAndText(Nakama.isPlaying);
+    Nakama.scoreText.text = `score: ${Nakama.score}`;
 
     Nakama.background.tilePosition.y += 2;
     updateGroupChicken();
@@ -188,6 +189,9 @@ var playerEnemyCollider = function(player, enemy) {
 var onBulletHitEnemy = function(bullet, enemy) {
   bullet.kill();
   enemy.damage(1);
+  if (enemy.alive == false) {
+    Nakama.score++;
+  }
 
   if (countEnemyAlive() == 0) {
     Nakama.isPlaying = false;
