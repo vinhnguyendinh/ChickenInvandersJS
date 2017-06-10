@@ -68,9 +68,14 @@ var create = function(){
   Nakama.bulletGroup = Nakama.game.add.physicsGroup();
   Nakama.playerGroup = Nakama.game.add.physicsGroup();
   Nakama.buttonGroup = Nakama.game.add.physicsGroup();
-
   Nakama.enemies = [];
-  createEnemyForLevelOne();
+  for (var i = 0; i < 3; i++) {
+    for (var j = 0; j < 5; j++) {
+      var x = j * 80;
+      var y = i * 80;
+      Nakama.enemies.push(createChicken(x, y + 200));
+    }
+  }
   this.chickenIsMovingLeft = true;
 
   Nakama.players = [];
@@ -79,11 +84,9 @@ var create = function(){
   );
 
   // Init property
-  Nakama.level = 1;
   Nakama.lives = 1;
   Nakama.score = 0;
   Nakama.isPlaying = false;
-  Nakama.isNextLevel = false;
   Nakama.firstStart = true;
 
   Nakama.introText = Nakama.game.add.text(Nakama.game.world.centerX, 400, '- ENTER to start -', { font: "40px Arial", fill: "#ffffff", align: "center" });
@@ -91,8 +94,8 @@ var create = function(){
   Nakama.introText.inputEnabled = true;
   var key1 = Nakama.game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
   key1.onDown.add(down, this);
+  // Nakama.introText.events.onInputDown.add(down, this);
 
-  Nakama.scoreText = Nakama.game.add.text(Nakama.game.world.centerX, 20, `Level: ${Nakama.level}`, { font: "20px Arial", fill: "#ffffff", align: "center" });
   Nakama.scoreText = Nakama.game.add.text(32, 900, `score: ${Nakama.score}`, { font: "20px Arial", fill: "#ffffff", align: "left" });
   Nakama.livesText = Nakama.game.add.text(550, 900, `lives: ${Nakama.lives}`, { font: "20px Arial", fill: "#ffffff", align: "left" });
 
@@ -100,50 +103,18 @@ var create = function(){
 
 }
 
-var createEnemyForLevelOne = function() {
-  for (var i = 0; i < 3; i++) {
-    for (var j = 0; j < 5; j++) {
-      var x = j * 80;
-      var y = i * 80;
-      Nakama.enemies.push(createChicken(x, y + 200));
-    }
-  }
-}
-
-var createEnemyForLevelTwo = function() {
-  for (var i = 0; i < 3; i++) {
-    for (var j = 0; j < 5; j++) {
-      var x = j * 80;
-      var y = i * 80;
-      Nakama.enemies.push(new StoneController(x, y, 'da.png', {
-        speed: 300
-      }));
-    }
-  }
-}
-
 // update game state each frame
 var update = function(){
   if (Nakama.isPlaying) { // Show enemy and player
+    var checkNumber = Math.random()*Nakama.enemies.length|0;
+    Nakama.enemies[checkNumber].update();
     showPlayerEnemyAndText(Nakama.isPlaying);
     Nakama.scoreText.text = `score: ${Nakama.score}`;
 
     Nakama.background.tilePosition.y += 2;
+    updateGroupChicken();
     for (player of Nakama.players) {
         player.update();
-    }
-    for (enemy of Nakama.enemies) {
-        enemy.update();
-    }
-    switch (Nakama.level) {
-      case 1:
-        updateGroupChicken();
-        break;
-      case 2:
-
-        break;
-      default:
-
     }
     Nakama.game.physics.arcade.overlap(
       Nakama.bulletGroup,
@@ -155,6 +126,11 @@ var update = function(){
       Nakama.playerGroup,
       Nakama.enemyGroup,
       playerEnemyCollider
+    );
+    Nakama.game.physics.arcade.overlap(
+      Nakama.playerGroup,
+      Nakama.enemybulletGroup,
+      playerEnemybulletCollider
     );
 
   } else { // Hide enemy and player
@@ -180,19 +156,6 @@ var changeIntroText = function(text) {
 }
 
 var reloadGame = function() {
-  Nakama.level = 1;
-  Nakama.lives = 1;
-  Nakama.score = 0;
-  Nakama.isPlaying = false;
-  Nakama.isNextLevel = false;
-  Nakama.firstStart = true;
-
-  Nakama.introText.text = '- ENTER to start -';
-  Nakama.scoreText.text = `Level: ${Nakama.level}`;
-  Nakama.livesText.text = `lives: ${Nakama.lives}`;
-
-  Nakama.enemyGroup = Nakama.game.add.physicsGroup();
-  createEnemyForLevelOne();
   for (enemy of Nakama.enemies) {
     enemy.sprite.reset(enemy.position.x, enemy.position.y);
   }
@@ -204,26 +167,10 @@ function down(item) {
     Nakama.isPlaying = !Nakama.isPlaying;
   } else {
     if (countEnemyAlive() == 0) {
-      Nakama.level++;
-      Nakama.enemies = [];
-      switch (Nakama.level) {
-        case 1:
-          createEnemyForLevelOne();
-          break;
-        case 2:
-          createEnemyForLevelTwo();
-          break;
-        case 3:
-
-          break;
-        default:
-
-      }
-      Nakama.isPlaying = !Nakama.isPlaying;
-
-    } else {
       reloadGame();
-      Nakama.isPlaying = true;
+      Nakama.isPlaying = !Nakama.isPlaying;
+    } else {
+
     }
   }
 }
@@ -241,6 +188,10 @@ var playerEnemyCollider = function(player, enemy) {
   } else {
     Nakama.isPlaying = false;
   }
+}
+var playerEnemybulletCollider = function(player, enemybullet) {
+  enemybullet.kill();
+  player.kill();
 }
 
 // MARK : - Chicken
@@ -261,6 +212,7 @@ var onBulletHitEnemy = function(bullet, enemy) {
 
 }
 
+
 var countEnemyAlive = function() {
   var count = 0;
   for (enemy of Nakama.enemies) {
@@ -274,6 +226,7 @@ var countEnemyAlive = function() {
 var createChicken = function(x, y) {
   return new BaseChickenController(x, y, 'chicken', {
     speed: 14,
+
   });
 }
 
