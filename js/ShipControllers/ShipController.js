@@ -15,6 +15,12 @@ class ShipController {
   }
 
   update() {
+    if (!this.sprite.alive) {
+      this.spriteRocket.kill();
+    } else {
+
+    }
+
     if (Nakama.keyboard.isDown(this.configs.up)) {
       this.sprite.position.y = Math.max(this.sprite.position.y - this.configs.speed, 0);
     } else if (Nakama.keyboard.isDown(this.configs.down)) {
@@ -22,7 +28,7 @@ class ShipController {
     } else if (Nakama.keyboard.isDown(this.configs.left)) {
       this.sprite.position.x = Math.max(this.sprite.position.x - this.configs.speed, 0);
     } else if (Nakama.keyboard.isDown(this.configs.right)) {
-      this.sprite.position.x = Math.min(this.sprite.position.x + this.configs.speed, Nakama.game.width - this.sprite.width);
+      this.sprite.position.x = Math.min(this.sprite.position.x + this.configs.speed, Nakama.game.width);
     }
     this.spriteRocket.position = this.sprite.position;
 
