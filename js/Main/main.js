@@ -112,13 +112,13 @@ var createEnemyForLevelThree = function() {
     for (var j = 0; j < 5; j++) {
       var x = j * 80;
       var y = i * 80;
+
       Nakama.enemies.push(
-        new ChickenType1Controller(x, y+ 200, 'chicken', {
-          speed: 14
-        })
-      );
+        new ChickenType1Controller(x, y + 200, 'chicken', {
+          speed: 10
+        }));
+      }
     }
-  }
 }
 
 function createEnemyForLevelTwo(number) {
