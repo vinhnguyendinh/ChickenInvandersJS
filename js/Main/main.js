@@ -120,16 +120,21 @@ var createEnemyForLevelTwo = function() {
 
 // update game state each frame
 var update = function() {
+
   if (Nakama.isPlaying) { // Show enemy and player
+
     var checkNumber = Math.random()*Nakama.enemies.length|0;
     Nakama.enemies[checkNumber].update();
-    showPlayerEnemyAndText(Nakama.isPlaying);
-    Nakama.scoreText.text = `score: ${Nakama.score}`;
 
+    showPlayerEnemyAndText(Nakama.isPlaying);
+    collision();
+    Nakama.scoreText.text = `score: ${Nakama.score}`;
     Nakama.background.tilePosition.y += 2;
+
     for (player of Nakama.players) {
         player.update();
     }
+
     switch (Nakama.level) {
       case 1:
         updateGroupChicken();
@@ -140,23 +145,6 @@ var update = function() {
       default:
 
     }
-    Nakama.game.physics.arcade.overlap(
-      Nakama.bulletGroup,
-      Nakama.enemyGroup,
-      onBulletHitEnemy
-    );
-
-    Nakama.game.physics.arcade.overlap(
-      Nakama.playerGroup,
-      Nakama.enemyGroup,
-      playerEnemyCollider
-    );
-
-    Nakama.game.physics.arcade.overlap(
-      Nakama.playerGroup,
-      Nakama.enemybulletGroup,
-      playerEnemybulletCollider
-    );
 
   } else { // Hide enemy and player
     if (Nakama.firstStart) {
@@ -173,12 +161,35 @@ var update = function() {
 
 }
 
+var collision = function() {
+  Nakama.game.physics.arcade.overlap(
+    Nakama.bulletGroup,
+    Nakama.enemyGroup,
+    onBulletHitEnemy
+  );
+
+  Nakama.game.physics.arcade.overlap(
+    Nakama.playerGroup,
+    Nakama.enemyGroup,
+    playerEnemyCollider
+  );
+
+  Nakama.game.physics.arcade.overlap(
+    Nakama.playerGroup,
+    Nakama.enemybulletGroup,
+    playerEnemybulletCollider
+  );
+}
+
 // before camera render (mostly for debug)
 var render = function(){}
 
 var playerEnemybulletCollider = function(player, enemybullet) {
   enemybullet.kill();
   player.kill();
+  if (player.alive == false) {
+    restart();
+  }
 }
 
 var changeIntroText = function(text) {
@@ -186,30 +197,7 @@ var changeIntroText = function(text) {
 }
 
 var restart = function() {
-  Nakama.level = 1;
-  Nakama.lives = 1;
-  Nakama.score = 0;
-  Nakama.isPlaying = true;
-  Nakama.isNextLevel = false;
-  Nakama.firstStart = false;
-
-  Nakama.introText.text = '- ENTER to start -';
-  Nakama.scoreText.text = `Level: ${Nakama.level}`;
-  Nakama.livesText.text = `lives: ${Nakama.lives}`;
-
-  Nakama.enemybulletGroup.callAll('revive');
-  Nakama.enemyGroup.callAll('revive');
-  Nakama.bulletGroup.callAll('revive');
-  Nakama.playerGroup.callAll('revive');
-
-  Nakama.enemies.removeAll();
-  createEnemyForLevelOne();
-  this.chickenIsMovingLeft = true;
-
-  Nakama.players.removeAll();
-  Nakama.players.push(
-    new ShipController(200, 600, '5.png', Nakama.configs.PLAYER_1_CONTROL)
-  );
+  window.location.reload();
 }
 
 function down(item) {
@@ -236,14 +224,10 @@ function down(item) {
       }
       Nakama.isPlaying = !Nakama.isPlaying;
     } else {
-      if (Nakama.playerGroup.countLiving() == 0) {
-        restart();
-      }
+      restart();
     }
   }
 }
-
-
 
 var showPlayerEnemyAndText = function(isShow) {
   Nakama.playerGroup.visible = isShow;
@@ -273,7 +257,7 @@ var onBulletHitEnemy = function(bullet, enemy) {
   if (Nakama.enemyGroup.countLiving() == 0) {
     Nakama.isPlaying = false;
   } else {
-
+    Nakama.isPlaying = true;
   }
 }
 

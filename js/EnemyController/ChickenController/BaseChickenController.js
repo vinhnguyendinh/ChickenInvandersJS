@@ -9,7 +9,7 @@ class BaseChickenController {
     this.sprite.animations.add('run');
     this.sprite.animations.play('run', this.configs.speed, true);
     this.sprite.anchor = new Phaser.Point(0.5, 0.5);
-    this.sprite.health = 2;
+    this.sprite.health = 1;
     this.timeSinceLastFire = 0;
     this.configs.cooldown = 0.9;
 
