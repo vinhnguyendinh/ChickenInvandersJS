@@ -68,12 +68,12 @@ var create = function(){
   Nakama.playerGroup = Nakama.game.add.physicsGroup();
   Nakama.buttonGroup = Nakama.game.add.physicsGroup();
 
-  Nakama.chickens = [];
+  Nakama.enemies = [];
   for (var i = 0; i < 3; i++) {
     for (var j = 0; j < 5; j++) {
       var x = j * 80;
       var y = i * 80;
-      Nakama.chickens.push(createChicken(x, y + 200));
+      Nakama.enemies.push(createChicken(x, y + 200));
     }
   }
   this.chickenIsMovingLeft = true;
@@ -127,7 +127,11 @@ var update = function(){
     if (Nakama.firstStart) {
       changeIntroText('- click to start -');
     } else {
-      changeIntroText('Game Over');
+      if (countEnemyAlive() == 0) {
+        changeIntroText('Victory!');
+      } else {
+        changeIntroText('Game Over!');
+      }
     }
     showPlayerEnemyAndText(Nakama.isPlaying);
   }
@@ -159,7 +163,6 @@ var playerEnemyCollider = function(player, enemy) {
 
   } else {
     Nakama.isPlaying = false;
-
   }
 }
 
@@ -169,6 +172,23 @@ var playerEnemyCollider = function(player, enemy) {
 var onBulletHitEnemy = function(bullet, enemy) {
   bullet.kill();
   enemy.damage(1);
+
+  if (countEnemyAlive() == 0) {
+    Nakama.isPlaying = false;
+  } else {
+
+  }
+
+}
+
+var countEnemyAlive = function() {
+  var count = 0;
+  for (enemy of Nakama.enemies) {
+    if (enemy.sprite.health > 0) {
+      count++;
+    }
+  }
+  return count;
 }
 
 var createChicken = function(x, y) {
