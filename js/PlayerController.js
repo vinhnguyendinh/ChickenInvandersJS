@@ -2,6 +2,9 @@ class PlayerController {
   constructor(x, y, spriteName, animateSprite, bullets, configs) {
 
     // Player
+    this.positionX = x;
+    this.positionY = y;
+
     this.sprite = Nakama.game.add.sprite(x, y, 'assets', spriteName);
     this.sprite.anchor.setTo(0.5, 0.5);
     Nakama.game.physics.enable(this.sprite, Phaser.Physics.ARCADE);
@@ -25,46 +28,41 @@ class PlayerController {
 
     // Bullets
     this.bullets = bullets;
+
+    // Audio
+    this.audioShoot = Nakama.game.add.audio(this.configs.audioShoot);
   }
 
   update() {
-    if (this.sprite.alive) {
-      //  Reset the player, then check for movement keys
-      this.sprite.body.velocity.setTo(0, 0);
+    //  Reset the player, then check for movement keys
+    this.sprite.body.velocity.setTo(0, 0);
 
-      if (this.cursors.left.isDown)
-      {
-        this.sprite.body.velocity.x = -this.configs.playerSpeed;
-      }
-      else if (this.cursors.right.isDown)
-      {
-        this.sprite.body.velocity.x = this.configs.playerSpeed;
-      }
-
-      if (this.cursors.up.isDown)
-      {
-        this.sprite.body.velocity.y = -this.configs.playerSpeed;
-      }
-      else if (this.cursors.down.isDown)
-      {
-        this.sprite.body.velocity.y = this.configs.playerSpeed;
-      }
-
-      // Update position player's rocket
-      this.spriteRocket.position = this.sprite.position;
-
-      //  Firing?
-      if (this.fireButton.isDown)
-      {
-        this.fireBullet(this.bullets);
-      }
-    }
-    else
+    if (this.cursors.left.isDown)
     {
-      // If player's dead is rocket will die
-      this.spriteRocket.kill();
+      this.sprite.body.velocity.x = -this.configs.playerSpeed;
+    }
+    else if (this.cursors.right.isDown)
+    {
+      this.sprite.body.velocity.x = this.configs.playerSpeed;
     }
 
+    if (this.cursors.up.isDown)
+    {
+      this.sprite.body.velocity.y = -this.configs.playerSpeed;
+    }
+    else if (this.cursors.down.isDown)
+    {
+      this.sprite.body.velocity.y = this.configs.playerSpeed;
+    }
+
+    // Update position player's rocket
+    this.spriteRocket.position = this.sprite.position;
+
+    //  Firing?
+    if (this.fireButton.isDown)
+    {
+      this.fireBullet(this.bullets);
+    }
   }
 
   fireBullet(bullets) {
@@ -76,6 +74,9 @@ class PlayerController {
 
       if (bullet)
       {
+        // Play audio shooter
+        this.audioShoot.play();
+
         //  And fire it
         bullet.reset(this.sprite.x, this.sprite.y + 8);
         bullet.body.velocity.y = -400;
@@ -85,6 +86,9 @@ class PlayerController {
   }
 
   reset() {
+    this.sprite.position.x = this.positionX;
+    this.sprite.position.y = this.positionY;
+
     this.bulletTime = 0;
     this.sprite.revive();
     this.spriteRocket.revive();

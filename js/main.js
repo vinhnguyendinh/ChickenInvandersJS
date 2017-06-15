@@ -1,7 +1,7 @@
 var Nakama = {};
 Nakama.configs = {
-  PLAYER_SPEED: 300,
-  MAX_LEVEL   : 3,
+  PLAYER_SPEED : 300,
+  MAX_LEVEL    : 3,
   PLAYER_HEALTH: 3
 };
 
@@ -27,11 +27,17 @@ var preload = function(){
 
   Nakama.game.time.advancedTiming = true;
 
+  // Load images
   Nakama.game.load.atlasJSONHash('assets', 'Assets/assets.png', 'Assets/assets.json');
   Nakama.game.load.image('background', 'Assets/Map1.png');
   Nakama.game.load.atlasJSONHash('chicken', 'Assets/chickens.png', 'Assets/chickens.json');
   Nakama.game.load.atlasJSONHash('rocketPlayer', 'Assets/rockets.png', 'Assets/rockets.json');
   Nakama.game.load.spritesheet('kaboom', 'Assets/explode.png', 128, 128);
+
+  // Load audio
+  Nakama.game.load.audio('audio_background', 'assets/Sound/backgroundMusic.mp3');
+  Nakama.game.load.audio('audio_shoot', 'assets/Sound/sound 191 (rock_wav).mp3');
+  Nakama.game.load.audio('audio_enemy_die', 'assets/Sound/sound 189 (chickenhit2_wav).mp3');
 
 }
 
@@ -47,11 +53,22 @@ var score = 0;
 var scoreString = '';
 var scoreText;
 var lives;
+var audioEnemyDie;
 // initialize the game
 var create = function(){
 
   Nakama.game.physics.startSystem(Phaser.Physics.ARCADE);
   Nakama.keyboard = Nakama.game.input.keyboard;
+
+  //  Being mp3 files these take time to decode, so we can't play them instantly
+  //  Using setDecodedCallback we can be notified when they're ALL ready for use.
+  //  The audio files could decode in ANY order, we can never be sure which it'll be.
+  var backgroundMusic = Nakama.game.add.audio('audio_background');
+  backgroundMusic.volume = 0.1;
+  backgroundMusic.play();
+  backgroundMusic.loopFull();
+
+  audioEnemyDie = Nakama.game.add.audio('audio_enemy_die');
 
   //  The scrolling background
   background =  Nakama.game.add.tileSprite(0, 0, 640, 960, 'background');
@@ -68,7 +85,9 @@ var create = function(){
     playerSpeed : Nakama.configs.PLAYER_SPEED,
     //  And some controls to play the game with
     fireButton  : Nakama.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR),
-    cursors     : Nakama.game.input.keyboard.createCursorKeys()
+    cursors     : Nakama.game.input.keyboard.createCursorKeys(),
+    // Audio
+    audioShoot  : 'audio_shoot'
   });
 
   //  The baddies!
@@ -146,18 +165,27 @@ var update = function(){
   //  Scroll the background
   background.tilePosition.y += 2;
 
-  // Update player
-  player.update();
+  if (player.sprite.alive) {
+    // Update player
+    player.update();
 
-  // Update enemies
-  if (Nakama.game.time.now > firingTimer)
+    // Update enemies
+    if (Nakama.game.time.now > firingTimer)
+    {
+        enemyFires();
+    }
+
+    //  Run collision
+    Nakama.game.physics.arcade.overlap(bullets.bullets, aliens, collisionHandler, null, this);
+    Nakama.game.physics.arcade.overlap(enemyBullets.bullets, player.sprite, enemyHitsPlayer, null, this);
+    Nakama.game.physics.arcade.overlap(aliens, player.sprite, alienHitsPlayer, null, this);
+  }
+  else
   {
-      enemyFires();
+    // If player's dead is rocket will die
+    player.spriteRocket.kill();
   }
 
-  //  Run collision
-  Nakama.game.physics.arcade.overlap(bullets.bullets, aliens, collisionHandler, null, this);
-  Nakama.game.physics.arcade.overlap(enemyBullets.bullets, player.sprite, enemyHitsPlayer, null, this);
 }
 
 // before camera render (mostly for debug)
@@ -165,116 +193,150 @@ var render = function(){}
 
 function collisionHandler (bullet, alien) {
 
-    //  When a bullet hits an alien we kill them both
-    bullet.kill();
-    alien.kill();
+  //  When a bullet hits an alien we kill them both
+  bullet.kill();
+  alien.kill();
 
-    //  Increase the score
-    score += 20;
+  //  Increase the score
+  score += 20;
+  scoreText.text = scoreString + score;
+
+  //  And create an explosion
+  var explosion = explosions.getFirstExists(false);
+  explosion.reset(alien.body.center.x, alien.body.center.y);
+  explosion.play('kaboom', 30, false, true);
+
+  // Play audio enemy die
+  audioEnemyDie.play();
+
+  if (aliens.countLiving() == 0)
+  {
+    score += 1000;
     scoreText.text = scoreString + score;
 
-    //  And create an explosion
-    var explosion = explosions.getFirstExists(false);
-    explosion.reset(alien.body.center.x, alien.body.center.y);
-    explosion.play('kaboom', 30, false, true);
+    enemyBullets.bullets.callAll('kill',this);
+    stateText.text = " You Won, \n Click to restart";
+    stateText.visible = true;
 
-    if (aliens.countLiving() == 0)
-    {
-        score += 1000;
-        scoreText.text = scoreString + score;
-
-        enemyBullets.bullets.callAll('kill',this);
-        stateText.text = " You Won, \n Click to restart";
-        stateText.visible = true;
-
-        //the "click to restart" handler
-        Nakama.game.input.onTap.addOnce(restart,this);
-    }
+    //the "click to restart" handler
+    Nakama.game.input.onTap.addOnce(restart,this);
+  }
 
 }
 
 function enemyHitsPlayer (player,bullet) {
 
-    bullet.kill();
+  bullet.kill();
 
-    live = lives.getFirstAlive();
+  live = lives.getFirstAlive();
 
-    if (live)
-    {
-        live.kill();
-    }
+  if (live)
+  {
+    live.kill();
+  }
 
-    //  And create an explosion :)
-    var explosion = explosions.getFirstExists(false);
-    explosion.reset(player.body.x, player.body.y);
-    explosion.play('kaboom', 30, false, true);
+  //  And create an explosion :)
+  var explosion = explosions.getFirstExists(false);
+  explosion.reset(player.body.center.x, player.body.center.y);
+  explosion.play('kaboom', 30, false, true);
 
-    // When the player dies
-    if (lives.countLiving() < 1)
-    {
-        player.kill();
-        enemyBullets.bullets.callAll('kill');
+  // When the player dies
+  if (lives.countLiving() < 1)
+  {
+    player.kill();
+    enemyBullets.bullets.callAll('kill');
 
-        stateText.text=" GAME OVER \n Click to restart";
-        stateText.visible = true;
+    stateText.text = " GAME OVER \n Click to restart";
+    stateText.visible = true;
 
-        // the "click to restart" handler
-        Nakama.game.input.onTap.addOnce(restart,this);
-    }
+    // the "click to restart" handler
+    Nakama.game.input.onTap.addOnce(restart,this);
+  }
 
+}
+
+function alienHitsPlayer(player, alien) {
+
+  alien.kill();
+
+  live = lives.getFirstAlive();
+
+  if (live)
+  {
+    live.kill();
+  }
+
+  //  And create an explosion :)
+  var explosion = explosions.getFirstExists(false);
+  explosion.reset(player.body.center.x, player.body.center.y);
+  explosion.play('kaboom', 30, false, true);
+
+  // When the player dies
+  if (lives.countLiving() < 1)
+  {
+    player.kill();
+    enemyBullets.bullets.callAll('kill');
+
+    stateText.text = " GAME OVER \n Click to restart";
+    stateText.visible = true;
+
+    // the "click to restart" handler
+    Nakama.game.input.onTap.addOnce(restart,this);
+  }
 }
 
 function enemyFires () {
 
-    //  Grab the first bullet we can from the pool
-    enemyBullet = enemyBullets.bullets.getFirstExists(false);
+  //  Grab the first bullet we can from the pool
+  enemyBullet = enemyBullets.bullets.getFirstExists(false);
 
-    livingEnemies.length=0;
+  livingEnemies.length = 0;
 
-    aliens.forEachAlive(function(alien){
+  aliens.forEachAlive(function(alien){
 
-        // put every living enemy in an array
-        livingEnemies.push(alien);
-    });
+    // put every living enemy in an array
+    livingEnemies.push(alien);
+  });
 
 
-    if (enemyBullet && livingEnemies.length > 0)
-    {
+  if (enemyBullet && livingEnemies.length > 0)
+  {
 
-        var random = Nakama.game.rnd.integerInRange(0,livingEnemies.length-1);
+    var random = Nakama.game.rnd.integerInRange(0,livingEnemies.length-1);
 
-        // randomly select one of them
-        var shooter = livingEnemies[random];
-        // And fire the bullet from this enemy
-        enemyBullet.reset(shooter.body.x, shooter.body.y);
+    // randomly select one of them
+    var shooter = livingEnemies[random];
+    // And fire the bullet from this enemy
+    enemyBullet.reset(shooter.body.x, shooter.body.y);
 
-        Nakama.game.physics.arcade.moveToObject(enemyBullet, player.sprite, 120);
-        firingTimer = Nakama.game.time.now + 2000;
-    }
+    Nakama.game.physics.arcade.moveToObject(enemyBullet, player.sprite, 120);
+    firingTimer = Nakama.game.time.now + 2000;
+  }
 
 }
 
 // Restart
 function resetBullet (bullet) {
 
-    //  Called if the bullet goes out of the screen
-    bullet.kill();
+  //  Called if the bullet goes out of the screen
+  bullet.kill();
 
 }
 
 function restart () {
 
-    //  A new level starts
+  //  A new level starts
 
-    //resets the life count
-    lives.callAll('revive');
-    //  And brings the aliens back from the dead :)
-    aliens.removeAll();
-    createAliens();
+  //revives the player
+  player.reset();
+  
+  //resets the life count
+  lives.callAll('revive');
+  //  And brings the aliens back from the dead :)
+  aliens.removeAll();
+  createAliens();
 
-    //revives the player
-    player.reset();
-    //hides the text
-    stateText.visible = false;
+  //hides the text
+  stateText.visible = false;
 
 }
